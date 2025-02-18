@@ -10,7 +10,6 @@ const CountDown: FC<IProps> = ({time, timedOut}) => {
   const timeInterval = useRef(0);
 
   useEffect(() => {
-    console.log(time)
     if (timeInterval.current) {
       clearInterval(timeInterval.current);
       setTimeRemain(time);
