@@ -1,4 +1,5 @@
 import {FC, useEffect, useRef, useState} from "react";
+import {parseTime} from "../utlis/number-utils.ts";
 
 export interface IProps {
   time: number;
@@ -27,7 +28,7 @@ const CountDown: FC<IProps> = ({time, timedOut}) => {
   }, [time]);
 
   return <section>
-    {timeRemain}
+    <span className={'font-mono text-9xl'}>{parseTime(timeRemain)}</span>
   </section>
 }
 
