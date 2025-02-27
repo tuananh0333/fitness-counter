@@ -4,11 +4,21 @@ const pad = (num: number, size: number) => {
   return _num;
 }
 
+const toHour = (time: number) => {
+  return Math.floor(time / 3600);
+}
+const toMinute = (time: number) => {
+  return Math.floor((time - toHour(time)) / 60);
+}
+const toSecond = (time: number) => {
+  return time - (toHour(time) * 3600 + toMinute(time) * 60);
+}
 const parseTime = (time: number) => {
-  const hours = Math.floor(time / 3600);
-  const minutes = Math.floor((time - hours * 3600) / 60);
-  const seconds = time - (hours * 3600 + minutes * 60);
+  const hours = toHour(time);
+  const minutes = toMinute(time);
+  const seconds = toSecond(time);
   return `${pad(hours, 2)}:${pad(minutes, 2)}:${pad(seconds, 2)}`;
 }
 
-export { parseTime };
+
+export {toHour, toMinute, toSecond, parseTime};

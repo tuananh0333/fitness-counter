@@ -1,17 +1,17 @@
-import {Step} from "./fitness-types/workout";
-import {CountDown} from "./components/count-down.tsx";
+import {Step} from "../fitness-types/workout";
+import {CountDown} from "../components/count-down.tsx";
 import {useEffect, useState} from "react";
 import classNames from "classnames";
 
 const steps: Step[] = [
-  {type: 'do', time: 30, description: 'push up'},
+  {type: 'do', time: 30, description: 'cafe'},
   {type: 'rest', time: 50},
-  {type: 'do', time: 100},
-  {type: 'do', time: 125, description: 'squat'},
+  {type: 'do', time: 100, description: 'code'},
+  {type: 'do', time: 125, description: 'film'},
   {type: 'rest', time: 30000}
 ]
 
-function App() {
+function WorkoutCounter() {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [currentStep, setCurrentStep] = useState<Step | null>();
   const [workoutEnded, setWorkoutEnded] = useState(false);
@@ -34,7 +34,7 @@ function App() {
 
   if (!currentStep) return null;
   return (
-    <div className={classNames("w-full h-full flex justify-center items-center text-center transition-all", {
+    <div className={classNames("w-full h-full flex justify-center items-center text-center transition-all select-none", {
       'bg-neutral-900 text-gray-300': workoutEnded || currentStep.type === 'rest',
       'bg-gray-300 text-neutral-900': !workoutEnded && currentStep.type === 'do',
     })}>
@@ -52,4 +52,4 @@ function App() {
   )
 }
 
-export default App
+export default WorkoutCounter
