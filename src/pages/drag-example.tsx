@@ -1,91 +1,45 @@
-import * as React from "react";
-import {FC, useCallback, useRef, useState} from "react";
-
-interface Position {
-  x: number;
-  y: number;
-}
-
-interface DraggableComponentProps {
-  index: number;
-  defaultPosition?: Position;
-  children?: React.ReactNode;
-  onSetPosition?: (position: Position, activeIndex: number) => void;
-}
-
-const DraggableComponent: FC<DraggableComponentProps> = ({defaultPosition, children, onSetPosition, index}) => {
-  const componentRef = useRef(null);
-  const [moving, setMoving] = useState(false);
-  const [x, setX] = useState(defaultPosition?.x ?? 0);
-  const [y, setY] = useState(defaultPosition?.y ?? 0);
-
-  const mouseMove = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
-    if (moving && componentRef.current) {
-      const element = componentRef.current as HTMLDivElement;
-      setX(element.offsetLeft + event.movementX);
-      setY(element.offsetTop + event.movementY)
-    }
-  }, [moving]);
-
-  const mouseDown = () => setMoving(true);
-  const mouseUp = () => {
-    setMoving(false);
-    if (onSetPosition) onSetPosition({
-      x: x, y: y
-    }, index);
-  }
-  const mouseLeave = () => setMoving(false);
-
-  return <div className={'absolute'}
-              style={{top: y, left: x, zIndex: moving ? 1000 : 1}}
-              ref={componentRef}
-              onMouseDown={mouseDown}
-              onMouseLeave={mouseLeave}
-              onMouseUp={mouseUp}
-              onMouseMove={(event) => mouseMove(event)}>
-    {children}
-  </div>
-}
+import {FC, useEffect, useRef, useState} from "react";
+import {createSwapy, Swapy} from "swapy";
 
 const DragExample: FC = () => {
+  const swapy = useRef<Swapy>(null)
+  const container = useRef(null)
 
-  const [positionList, setPositionList] = useState<{ index: number, position: Position }[]>([]);
+  const [list, setList] = useState<number[]>([]);
 
   const add = () => {
-    console.log(positionList);
-    setPositionList([...positionList, {
-      index: positionList.length,
-      position: {
-        x: 12,
-        y: positionList.length * 60
-      },
-    }]);
+    setList([...list, 0]);
   }
 
-  const onSetPosition = (_position: Position, index: number) => {
-    const predictedIndex = 3;
-    const newList = [...positionList.slice(0, predictedIndex-1), {
-      index: index, position: {
-        x: 12, y: (predictedIndex-1) * 60
-      }
-    }, ...positionList.slice(predictedIndex, positionList.length)];
+  useEffect(() => {
+    if (container.current) {
+      console.log('sd')
+      swapy.current = createSwapy(container.current)
 
-    console.log(newList)
-  }
+      // Your event listeners
+      swapy.current.onSwap((event) => {
+        console.log(`${event.fromSlot} ==> ${event.toSlot}`)
+      })
+    }
+
+    return () => {
+      // Destroy the swapy instance on component destroy
+      swapy.current?.destroy()
+    }
+  }, []);
+
+  useEffect(() => {
+    if (swapy.current) swapy.current.update();
+  }, [list]);
 
   return <div className={'w-full h-full p-3 relative select-none'}>
     <div>
       <button className={'p-3 bg-blue-300'} onClick={add}>add</button>
     </div>
-    <div className={'relative'}>
-      {positionList.map((item, index) => (<DraggableComponent
-        key={index}
-        index={item.index}
-        defaultPosition={item.position}
-        onSetPosition={onSetPosition}
-      >
-        <div className={'p-4 bg-gray-300'}>item {index}</div>
-      </DraggableComponent>))}
+    <div className={''} ref={container}>
+      {list.map((_item, index) => (<div key={index} data-swapy-slot={index}>
+        <div data-swapy-item={index} className={'bg-blue-300 p-3 m-1'}>{index}</div>
+      </div>))}
     </div>
   </div>
 }
