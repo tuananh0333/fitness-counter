@@ -7,11 +7,13 @@ interface Position {
 }
 
 interface DraggableComponentProps {
+  index: number;
   defaultPosition?: Position;
   children?: React.ReactNode;
+  onSetPosition?: (position: Position, activeIndex: number) => void;
 }
 
-const DraggableComponent: FC<DraggableComponentProps> = ({defaultPosition, children}) => {
+const DraggableComponent: FC<DraggableComponentProps> = ({defaultPosition, children, onSetPosition, index}) => {
   const componentRef = useRef(null);
   const [moving, setMoving] = useState(false);
   const [x, setX] = useState(defaultPosition?.x ?? 0);
@@ -26,7 +28,12 @@ const DraggableComponent: FC<DraggableComponentProps> = ({defaultPosition, child
   }, [moving]);
 
   const mouseDown = () => setMoving(true);
-  const mouseUp = () => setMoving(false);
+  const mouseUp = () => {
+    setMoving(false);
+    if (onSetPosition) onSetPosition({
+      x: x, y: y
+    }, index);
+  }
   const mouseLeave = () => setMoving(false);
 
   return <div className={'absolute'}
@@ -42,13 +49,28 @@ const DraggableComponent: FC<DraggableComponentProps> = ({defaultPosition, child
 
 const DragExample: FC = () => {
 
-  const [positionList, setPositionList] = useState<Position[]>([]);
+  const [positionList, setPositionList] = useState<{ index: number, position: Position }[]>([]);
 
   const add = () => {
+    console.log(positionList);
     setPositionList([...positionList, {
-      x: 12,
-      y: positionList.length * 60,
+      index: positionList.length,
+      position: {
+        x: 12,
+        y: positionList.length * 60
+      },
     }]);
+  }
+
+  const onSetPosition = (_position: Position, index: number) => {
+    const predictedIndex = 3;
+    const newList = [...positionList.slice(0, predictedIndex-1), {
+      index: index, position: {
+        x: 12, y: (predictedIndex-1) * 60
+      }
+    }, ...positionList.slice(predictedIndex, positionList.length)];
+
+    console.log(newList)
   }
 
   return <div className={'w-full h-full p-3 relative select-none'}>
@@ -56,7 +78,12 @@ const DragExample: FC = () => {
       <button className={'p-3 bg-blue-300'} onClick={add}>add</button>
     </div>
     <div className={'relative'}>
-      {positionList.map((position, index) => (<DraggableComponent defaultPosition={position} key={index}>
+      {positionList.map((item, index) => (<DraggableComponent
+        key={index}
+        index={item.index}
+        defaultPosition={item.position}
+        onSetPosition={onSetPosition}
+      >
         <div className={'p-4 bg-gray-300'}>item {index}</div>
       </DraggableComponent>))}
     </div>
