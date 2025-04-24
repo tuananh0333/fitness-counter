@@ -13,7 +13,6 @@ const DragExample: FC = () => {
 
   useEffect(() => {
     if (container.current) {
-      console.log('sd')
       swapy.current = createSwapy(container.current)
 
       // Your event listeners
